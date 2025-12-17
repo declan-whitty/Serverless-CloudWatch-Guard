@@ -1,0 +1,14 @@
+# Terraform and build artifacts
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Lambda build artifacts
+lambda_function.zip
+
+# Python
+__pycache__/
+*.pyc
+
