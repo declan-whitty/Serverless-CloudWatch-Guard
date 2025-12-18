@@ -2,8 +2,20 @@
 
 > Real-time AWS control plane monitoring with automated alerting for high-risk actions.
 
-## Architecture Diagram
-![Architecture Diagram Placeholder](docs/architecture.png)
+## Architecture
+This project deploys a serverless security guard that watches for high-risk control plane changes in near real-time.
+
+```mermaid
+graph TD
+    User((User / Attacker)) -->|1. High-risk API call| CloudTrail[AWS CloudTrail]
+    CloudTrail -->|2. Logs event| EB[Amazon EventBridge]
+    EB -->|3. Triggers rule| Lambda[AWS Lambda (Python)]
+    Lambda -->|4. Parses & enriches| SNS[Amazon SNS]
+    SNS -->|5. Delivers alert| Email((Security Admin))
+
+    style Lambda fill:#f9f,stroke:#333,stroke-width:2px
+    style SNS fill:#ff9,stroke:#333,stroke-width:2px
+```
 
 ## The Problem
 Modern AWS estates emit millions of CloudTrail records daily. Manual log review is infeasible for detecting rapid-threat actions such as privileged user creation or overly permissive security group changes. Delayed SIEM ingestion and batch analytics leave gaps where attackers can establish persistence or exfiltrate data before human review. Real-time, event-driven controls are required to identify and escalate risky API calls the moment they occur.
