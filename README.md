@@ -7,13 +7,13 @@ This project deploys a serverless security guard that watches for high-risk cont
 
 ```mermaid
 graph TD
-    User((User / Attacker)) -->|1. High-risk API call| CloudTrail[AWS CloudTrail]
-    CloudTrail -->|2. Logs event| EB[Amazon EventBridge]
-    EB -->|3. Triggers rule| Lambda[AWS Lambda (Python)]
-    Lambda -->|4. Parses & enriches| SNS[Amazon SNS]
-    SNS -->|5. Delivers alert| Email((Security Admin))
+    U["User / Attacker"] -->|1. High-risk API call| CT["AWS CloudTrail"]
+    CT -->|2. Logs event| EB["Amazon EventBridge"]
+    EB -->|3. Triggers rule| LF["AWS Lambda - Python"]
+    LF -->|4. Parses & enriches| SNS["Amazon SNS"]
+    SNS -->|5. Delivers alert| SA["Security Admin"]
 
-    style Lambda fill:#f9f,stroke:#333,stroke-width:2px
+    style LF fill:#f9f,stroke:#333,stroke-width:2px
     style SNS fill:#ff9,stroke:#333,stroke-width:2px
 ```
 
