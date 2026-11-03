@@ -1,0 +1,60 @@
+
+name: AWS Security CI
+
+on:
+  push:
+    branches:
+      - main
+      - improvement/security-hardening
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  python-tests:
+    name: Python Lambda Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check Python syntax
+        run: python -m py_compile lambda_function.py
+
+      - name: Run Lambda unit tests
+        run: python -m unittest discover -s tests -v
+
+  terraform-validation:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.17.1"
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check
+
+      - name: Initialise Terraform
+        run: terraform init -backend=false -input=false
+
+      - name: Validate infrastructure
+        run: terraform validate -no-color
