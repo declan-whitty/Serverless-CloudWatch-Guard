@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "lambda_policy" {
   }
 
   statement {
-    sid    = "AllowBasicLogs"
+    sid = "AllowBasicLogs"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -93,11 +93,11 @@ resource "aws_cloudwatch_event_rule" "high_risk_api" {
   description = "Capture high-risk API calls for real-time alerting"
 
   event_pattern = jsonencode({
-    "source"      : ["aws.iam", "aws.ec2"],
+    "source" : ["aws.iam", "aws.ec2"],
     "detail-type" : ["AWS API Call via CloudTrail"],
-    "detail"      : {
+    "detail" : {
       "eventSource" : ["iam.amazonaws.com", "ec2.amazonaws.com"],
-      "eventName"   : ["CreateUser", "AuthorizeSecurityGroupIngress"]
+      "eventName" : ["CreateUser", "AuthorizeSecurityGroupIngress"]
     }
   })
 }
