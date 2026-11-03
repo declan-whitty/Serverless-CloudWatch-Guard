@@ -22,6 +22,11 @@ resource "aws_sns_topic" "alerts" {
   name = local.sns_topic_name
 }
 
+resource "aws_cloudwatch_log_group" "guard" {
+  name              = "/aws/lambda/${local.lambda_function_name}"
+  retention_in_days = 14
+}
+
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_file = "${path.module}/lambda_function.py"
@@ -51,13 +56,14 @@ data "aws_iam_policy_document" "lambda_policy" {
   }
 
   statement {
-    sid = "AllowBasicLogs"
+    sid = "AllowLambdaLogging"
     actions = [
-      "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
     ]
-    resources = ["*"]
+    resources = [
+      "${aws_cloudwatch_log_group.guard.arn}:*"
+    ]
   }
 }
 
@@ -85,6 +91,7 @@ resource "aws_lambda_function" "guard" {
 
   depends_on = [
     aws_iam_role_policy.lambda_inline,
+    aws_cloudwatch_log_group.guard,
   ]
 }
 

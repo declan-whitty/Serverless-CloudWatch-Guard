@@ -17,11 +17,16 @@ def lambda_handler(event, context):
     Entrypoint for EventBridge-triggered CloudTrail events.
     Publishes an SNS alert when high-risk API calls are detected.
     """
-    logger.info("Received event: %s", json.dumps(event))
 
     try:
         detail = event.get("detail", {}) or {}
         event_name = detail.get("eventName", "UnknownEvent")
+
+        logger.info(
+            "Processing AWS security event: eventName=%s eventId=%s",
+            event_name,
+            event.get("id", "unknown"),
+        )
 
         if event_name not in MONITORED_ACTIONS:
             logger.info("Ignoring event %s; not in monitored list.", event_name)
