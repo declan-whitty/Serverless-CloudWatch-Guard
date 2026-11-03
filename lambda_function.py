@@ -36,8 +36,8 @@ def lambda_handler(event, context):
 
         sns_topic_arn = os.environ.get("SNS_TOPIC_ARN")
         if not sns_topic_arn:
-            logger.error("SNS_TOPIC_ARN environment variable is not set.")
-            return {"status": "error", "reason": "SNS_TOPIC_ARN not set"}
+            raise ValueError("SNS_TOPIC_ARN environment variable is not set")
+
 
         message = build_alert_message(
             event_name=event_name,
@@ -58,12 +58,12 @@ def lambda_handler(event, context):
         )
         logger.info("Alert published. MessageId=%s", response.get("MessageId"))
         return {"status": "alert_published", "messageId": response.get("MessageId")}
-    except (ClientError, BotoCoreError) as boto_err:
-        logger.exception("Boto3 error while publishing alert: %s", boto_err)
-        return {"status": "error", "reason": str(boto_err)}
-    except Exception as exc:
-        logger.exception("Unhandled error while processing security alert: %s", exc)
-        return {"status": "error", "reason": str(exc)}
+    except (ClientError, BotoCoreError):
+        logger.exception("AWS operation failed while processing security alert")
+        raise
+    except Exception:
+        logger.exception("Unhandled error while processing security alert")
+        raise
 
 
 def extract_actor(detail):

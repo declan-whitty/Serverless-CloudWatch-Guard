@@ -58,16 +58,16 @@ class TestCloudWatchGuard(unittest.TestCase):
         self.assertEqual(result["status"], "ignored")
         guard.sns_client.publish.assert_not_called()
 
-    def test_missing_topic_returns_error(self):
+    def test_missing_topic_raises_error(self):
         os.environ.pop("SNS_TOPIC_ARN", None)
 
-        result = guard.lambda_handler(self.event, None)
+        with self.assertRaises(ValueError) as context:
+            guard.lambda_handler(self.event, None)
 
-        self.assertEqual(result["status"], "error")
-        self.assertEqual(result["reason"], "SNS_TOPIC_ARN not set")
+        self.assertIn("SNS_TOPIC_ARN", str(context.exception))
         guard.sns_client.publish.assert_not_called()
 
-    def test_sns_failure_returns_error(self):
+    def test_sns_failure_raises_exception(self):
         guard.sns_client.publish.side_effect = ClientError(
             {
                 "Error": {
@@ -78,10 +78,13 @@ class TestCloudWatchGuard(unittest.TestCase):
             "Publish"
         )
 
-        result = guard.lambda_handler(self.event, None)
+        with self.assertRaises(ClientError) as context:
+            guard.lambda_handler(self.event, None)
 
-        self.assertEqual(result["status"], "error")
-        self.assertIn("AccessDenied", result["reason"])
+        self.assertEqual(
+            context.exception.response["Error"]["Code"],
+            "AccessDenied"
+        )
         guard.sns_client.publish.assert_called_once()
 
 
